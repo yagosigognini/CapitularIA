@@ -130,12 +130,12 @@ fun AdminScreenContent(
                     when (selectedTabIndex) {
                         0 -> RequestsTab(requests, isLoadingRequests, onApprove, onDeny, onProfileClick) // ✅ ATUALIZADO
                         1 -> MembersTab(members, isLoadingMembers, club?.adminId, isAdmin, onKick, onProfileClick) // ✅ ATUALIZADO
-                        2 -> ConfigTab(club, isAdmin, onLeaveClub, onDrawUser, onEditClub, onDeleteClub)
+                        2 -> ConfigTab(club, true, viewModel(), onLeaveClub, onDrawUser, onEditClub)
                     }
                 } else {
                     when (selectedTabIndex) {
                         0 -> MembersTab(members, isLoadingMembers, club?.adminId, isAdmin, onKick, onProfileClick) // ✅ ATUALIZADO
-                        1 -> ConfigTab(club, isAdmin, onLeaveClub, onDrawUser, onEditClub, onDeleteClub)
+                        1 -> ConfigTab(club, false, viewModel(), onLeaveClub, onDrawUser, onEditClub)
                     }
                 }
             }
@@ -158,7 +158,7 @@ fun RequestsTab(
         }
     } else if (requests.isEmpty()) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Nenhuma solicitação pendente.", modifier = Modifier.padding(16.dp))
+            Text("Nenhuma solicitação pendente.", modifier = Modifier.padding(16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     } else {
         LazyColumn(
@@ -212,22 +212,30 @@ fun MembersTab(
 fun ConfigTab(
     club: BookClub?,
     isAdmin: Boolean,
+    viewModel: AdminViewModel,
     onLeaveClub: () -> Unit,
     onDrawUser: () -> Unit,
-    onEditClub: () -> Unit,
-    onDeleteClub: () -> Unit
+    onEditClub: () -> Unit
 ) {
-    // ... (Código da ConfigTab não precisa de alteração) ...
     var showDeleteDialog by remember { mutableStateOf(false) }
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         if (club == null) {
             CircularProgressIndicator()
             return
         }
-        Text("Configurações do Clube", style = MaterialTheme.typography.titleLarge)
+
+        Text(
+            "Configurações do Clube",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Spacer(modifier = Modifier.height(16.dp))
+
         if (club.code != null) {
             OutlinedTextField(
                 value = club.code,
@@ -238,29 +246,40 @@ fun ConfigTab(
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
+
         if (isAdmin) {
             Button(onClick = onDrawUser, modifier = Modifier.fillMaxWidth()) {
                 Text("Sortear Novo Usuário")
             }
             Spacer(modifier = Modifier.height(16.dp))
+
             Button(onClick = onEditClub, modifier = Modifier.fillMaxWidth()) {
                 Text("EDITAR INFORMAÇÕES DO CLUBE")
             }
             Spacer(modifier = Modifier.height(8.dp))
+
+            // Botão Deletar Clube com verificação antes do diálogo
             Button(
-                onClick = { showDeleteDialog = true },
+                onClick = {
+                    if (viewModel.canDeleteClub()) {
+                        showDeleteDialog = true
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Text("DELETAR CLUBE", color = MaterialTheme.colorScheme.onError)
             }
+
             Text(
                 "Só é possível deletar se você for o único membro.",
                 style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
+
         Button(
             onClick = onLeaveClub,
             modifier = Modifier.fillMaxWidth(),
@@ -271,14 +290,18 @@ fun ConfigTab(
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
         }
+
         if (isAdmin) {
             Text(
                 "Admins não podem sair, devem transferir a administração.",
                 style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(top = 4.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
+
+    // Dialogo de confirmação de exclusão
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
@@ -287,7 +310,7 @@ fun ConfigTab(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        onDeleteClub()
+                        viewModel.deleteClub()
                         showDeleteDialog = false
                     }
                 ) { Text("EXCLUIR") }
@@ -298,6 +321,7 @@ fun ConfigTab(
         )
     }
 }
+
 
 // --- COMPONENTES DAS ABAS ---
 @Composable
@@ -326,7 +350,7 @@ fun RequestItem(
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(12.dp))
-            Text(user.name, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold)
+            Text(user.name, modifier = Modifier.weight(1f), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
             TextButton(onClick = onDeny) {
                 Text("Negar")
@@ -366,7 +390,7 @@ fun MemberItem(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(user.name, fontWeight = FontWeight.Bold)
+                Text(user.name, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if(isThisMemberAdmin) {
                     Text("Admin", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                 }

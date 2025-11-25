@@ -218,7 +218,7 @@ fun ReceivedRequestsList(
     onDeclineClick: (FriendRequest) -> Unit
 ) {
     if (requests.isEmpty()) {
-        Text("Nenhum pedido de amizade recebido.", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
+        Text("Nenhum pedido de amizade recebido.", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
     } else {
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(requests, key = { it.senderId }) { request ->
@@ -239,7 +239,7 @@ fun SentRequestsList(
     onCancelClick: (FriendRequest) -> Unit
 ) {
     if (requests.isEmpty()) {
-        Text("Nenhum pedido de amizade enviado.", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp))
+        Text("Nenhum pedido de amizade enviado.", textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(top = 16.dp), color = MaterialTheme.colorScheme.onSurfaceVariant)
     } else {
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(requests, key = { it.receiverId }) { request ->
@@ -282,7 +282,7 @@ fun FriendItemRow(
                 error = painterResource(id = R.drawable.ic_launcher_background)
             )
             Spacer(modifier = Modifier.width(12.dp))
-            Text(friend.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+            Text(friend.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = onRemoveRequestClick) {
                 Icon(Icons.Default.Close, contentDescription = "Remover Amigo", tint = MaterialTheme.colorScheme.error)
@@ -320,7 +320,7 @@ fun FriendRequestItemRow(
                 error = painterResource(id = R.drawable.ic_launcher_background)
             )
             Spacer(modifier = Modifier.width(12.dp))
-            Text(request.senderName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+            Text(request.senderName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = onDeclineClick) {
                 Icon(Icons.Default.Close, contentDescription = "Recusar", tint = MaterialTheme.colorScheme.error)
@@ -358,7 +358,7 @@ fun SentRequestItemRow(
             )
             Spacer(modifier = Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(request.receiverName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                Text(request.receiverName, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text("Pendente", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             IconButton(onClick = onCancelClick) {

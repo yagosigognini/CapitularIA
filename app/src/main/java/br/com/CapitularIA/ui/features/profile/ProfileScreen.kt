@@ -60,7 +60,6 @@ fun ProfileScreen(
     onSettingsClick: () -> Unit,
     onClubClick: (BookClub) -> Unit,
     onAddBookClick: () -> Unit,
-    onLogoutClick: () -> Unit,
     onFriendsListClick: () -> Unit,
 ) {
     LaunchedEffect(key1 = userId) { viewModel.loadUserProfile(userId) }
@@ -220,7 +219,6 @@ fun ProfileScreenContent(
                         user = user,
                         isOwnProfile = isOwnProfile,
                         friendshipStatus = friendshipStatus,
-                        onEditProfileClick = onEditProfileClick,
                         onSendFriendRequest = onSendFriendRequest,
                         onFriendsListClick = onFriendsListClick,
                         onRemoveFriendRequest = onRemoveFriendRequest,
@@ -256,7 +254,6 @@ fun ProfileHeader(
     user: User,
     isOwnProfile: Boolean,
     friendshipStatus: FriendshipStatus,
-    onEditProfileClick: () -> Unit,
     onSendFriendRequest: () -> Unit,
     onFriendsListClick: () -> Unit,
     onRemoveFriendRequest: () -> Unit,
@@ -283,7 +280,7 @@ fun ProfileHeader(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Nome
-        Text(text = user.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+        Text(text = user.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(modifier = Modifier.height(8.dp))
 
         // Sobre Mim
@@ -292,7 +289,8 @@ fun ProfileHeader(
                 text = user.aboutMe,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(16.dp))
         } else {
@@ -423,7 +421,8 @@ fun ChecklistSection(
             Text(
                 text = "Minha Estante",
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             if (isOwnProfile) {
                 Button(
@@ -446,7 +445,8 @@ fun ChecklistSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
             LazyRow(
@@ -455,7 +455,7 @@ fun ChecklistSection(
             ) {
                 items(
                     count = ratedBooks.size, // ✅ Número de itens
-                    key = { index -> ratedBooks[index].id ?: index } // ✅ Chave única
+                    key = { index -> ratedBooks[index].id } // ✅ Chave única
                 ) { index ->
                     val book = ratedBooks[index] // ✅ Obtém o livro pelo índice
                     RatedBookItem(
@@ -508,7 +508,8 @@ fun RatedBookItem(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 4.dp)
+                modifier = Modifier.padding(horizontal = 4.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -524,7 +525,8 @@ fun RatedBookItem(
                 Text(
                     text = String.format(Locale.US, "%.1f", book.rating),
                     style = MaterialTheme.typography.labelSmall,
-                    fontSize = 11.sp
+                    fontSize = 11.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }

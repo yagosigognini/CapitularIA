@@ -137,7 +137,7 @@ fun SearchUserScreenContent(
                 ) {
                     when (searchState) {
                         is SearchUserState.Idle -> { // Estado inicial
-                            Text("Digite um nome para encontrar usuários.")
+                            Text("Digite um nome para encontrar usuários.", color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         is SearchUserState.Loading -> { // Carregando
                             CircularProgressIndicator()
@@ -146,7 +146,7 @@ fun SearchUserScreenContent(
                             Text("Erro: ${searchState.message}", color = MaterialTheme.colorScheme.error)
                         }
                         is SearchUserState.NoResults -> { // Nenhum resultado
-                            Text("Nenhum usuário encontrado para \"$searchQuery\".")
+                            Text("Nenhum usuário encontrado para \"$searchQuery\".", color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         is SearchUserState.Success -> { // Sucesso, mostra a lista
                             LazyColumn(
@@ -203,7 +203,8 @@ fun UserResultItem(
             Text(
                 text = user.name,
                 style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium // Destaque leve
+                fontWeight = FontWeight.Medium, // Destaque leve
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             // Poderia adicionar mais informações aqui se quisesse (ex: user.aboutMe)
         }

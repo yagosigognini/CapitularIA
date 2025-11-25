@@ -4,9 +4,9 @@ import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState // ✅ IMPORT ADICIONADO
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll // ✅ IMPORT ADICIONADO
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -16,6 +16,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale // ✅ IMPORT ADICIONADO
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,12 +24,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import br.com.CapitularIA.ui.components.AppBackground
-import br.com.CapitularIA.ui.theme.CapitularIATheme
-import br.com.CapitularIA.ui.theme.ButtonRed
-import br.com.CapitularIA.ui.theme.TextColor
 import br.com.CapitularIA.R
+import br.com.CapitularIA.ui.components.AppBackground
+import br.com.CapitularIA.ui.theme.ButtonRed
+import br.com.CapitularIA.ui.theme.CapitularIATheme
+import br.com.CapitularIA.ui.theme.TextColor
 
 @Composable
 fun RegisterScreen(
@@ -106,87 +108,93 @@ fun RegisterScreenContent(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    // ✅ MUDANÇA: Box trocado por Column rolável
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.systemBars) // Protege das barras de sistema
+            .verticalScroll(rememberScrollState()) // Adiciona rolagem
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceAround // Espaçamento flexível
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.logo_completa),
+            contentDescription = "Logo Capítular IA",
+            // ✅ MUDANÇA: Tamanho adaptável
+            modifier = Modifier
+                .fillMaxWidth(0.8f) // Ocupa 80% da largura
+                .padding(top = 16.dp),
+            contentScale = ContentScale.Fit
+        )
+
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .padding(bottom = 16.dp), // Adiciona espaço no fim
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo_letraria),
-                contentDescription = "Logo Letraria",
-                modifier = Modifier.size(180.dp)
+            OutlinedTextField(value = nome, onValueChange = onNomeChange, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), singleLine = true, enabled = !isLoading)
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(value = email, onValueChange = onEmailChange, label = { Text("Email") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), singleLine = true, enabled = !isLoading)
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = password, onValueChange = onPasswordChange, label = { Text("Senha") },
+                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), singleLine = true,
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) { Icon(image, null) }
+                },
+                enabled = !isLoading
             )
-            Spacer(modifier = Modifier.weight(1f))
-            Column(
+            Spacer(modifier = Modifier.height(16.dp))
+            OutlinedTextField(
+                value = confirmPassword, onValueChange = onConfirmPasswordChange, label = { Text("Repetir a Senha") },
+                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), singleLine = true,
+                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                trailingIcon = {
+                    val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) { Icon(image, null) }
+                },
+                enabled = !isLoading
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Checkbox(checked = isChecked, onCheckedChange = onCheckedChange, enabled = !isLoading)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Li e concordo com as políticas e termos",
+                    color = TextColor,
+                    modifier = Modifier.clickable(onClick = onTermsClick)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onRegisterClick,
+                enabled = isChecked && !isLoading,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = ButtonRed)
             ) {
-                OutlinedTextField(value = nome, onValueChange = onNomeChange, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), singleLine = true, enabled = !isLoading)
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(value = email, onValueChange = onEmailChange, label = { Text("Email") }, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), singleLine = true, enabled = !isLoading)
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = password, onValueChange = onPasswordChange, label = { Text("Senha") },
-                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), singleLine = true,
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) { Icon(image, null) }
-                    },
-                    enabled = !isLoading
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
-                    value = confirmPassword, onValueChange = onConfirmPasswordChange, label = { Text("Repetir a Senha") },
-                    modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp), singleLine = true,
-                    visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                        IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) { Icon(image, null) }
-                    },
-                    enabled = !isLoading
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                    Checkbox(checked = isChecked, onCheckedChange = onCheckedChange, enabled = !isLoading)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Li e concordo com as políticas e termos",
-                        color = TextColor,
-                        modifier = Modifier.clickable(onClick = onTermsClick)
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = onRegisterClick,
-                    enabled = isChecked && !isLoading,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = ButtonRed)
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
-                    } else {
-                        Text("CADASTRAR", color = Color.White, fontWeight = FontWeight.Bold)
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                TextButton(onClick = onLoginClick, enabled = !isLoading) {
-                    Text("Já tem uma conta? Faça login", color = TextColor)
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                } else {
+                    Text("CADASTRAR", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
+            TextButton(onClick = onLoginClick, enabled = !isLoading) {
+                Text("Já tem uma conta? Faça login", color = TextColor)
+            }
         }
     }
 }
 
-// ✅ --- DIÁLOGO DE TERMOS CORRIGIDO ---
+// --- DIÁLOGO DE TERMOS (Corrigido com rolagem) ---
 @Composable
 fun TermsDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
@@ -196,18 +204,16 @@ fun TermsDialog(onDismiss: () -> Unit) {
                     .padding(24.dp)
                     .heightIn(max = 500.dp) // Limita a altura máxima
             ) {
-                // 1. Título (Fixo)
                 Text("Políticas e Termos", style = MaterialTheme.typography.headlineSmall)
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // 2. Área do Texto (Rolável)
                 Box(
                     modifier = Modifier
                         .weight(1f) // Ocupa o espaço disponível
                         .verticalScroll(rememberScrollState()) // Adiciona a rolagem
                 ) {
                     Text(
-                        "Bem-vindo ao Letraria! Ao usar nosso aplicativo, você concorda com estes termos. \n\n" +
+                        "Bem-vindo ao CapitularIA! Ao usar nosso aplicativo, você concorda com estes termos. \n\n" +
                                 "1. Contas de Usuário: Você é responsável por manter a confidencialidade da sua conta e senha. Você concorda em aceitar a responsabilidade por todas as atividades que ocorram sob sua conta.\n\n" +
                                 "2. Conteúdo Gerado pelo Usuário: Você é o único responsável pelo conteúdo (mensagens, indicações de livros, etc.) que publica nos clubes de leitura. Você não deve postar conteúdo ilegal, odioso ou difamatório.\n\n" +
                                 "3. Administração do Clube: Os administradores do clube têm o poder de adicionar ou remover membros de seus respectivos clubes. O Letraria não se responsabiliza por disputas de gerenciamento de clube.\n\n" +
@@ -224,7 +230,6 @@ fun TermsDialog(onDismiss: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // 3. Botão (Fixo)
                 Button(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
                     Text("FECHAR")
                 }

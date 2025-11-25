@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -87,7 +88,7 @@ fun SettingsScreenContent(
             containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
-                    title = { Text("Configurações") },
+                    title = { Text("Configurações", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     navigationIcon = {
                         IconButton(onClick = onBackClick) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
@@ -106,7 +107,7 @@ fun SettingsScreenContent(
                     .verticalScroll(rememberScrollState())
             ) {
                 // Seção de Conta
-                Text("Conta", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("Conta", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(8.dp))
                 InfoRow(label = "Email", value = userEmail)
                 ClickableRow(label = "Senha", value = "Redefinir", onClick = onPasswordResetClick)
@@ -114,14 +115,14 @@ fun SettingsScreenContent(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Seção de Preferências
-                Text("Preferências", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("Preferências", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(8.dp))
                 InfoRow(label = "Tema", value = "Padrão do Sistema")
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Seção "Sobre"
-                Text("Sobre", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Text("Sobre", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(8.dp))
                 ClickableRow(label = "Enviar Feedback", onClick = onFeedbackClick)
                 ClickableRow(label = "Termos e Políticas", onClick = onTermsClick)
@@ -189,7 +190,7 @@ private fun InfoRow(label: String, value: String) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, style = MaterialTheme.typography.bodyLarge)
+        Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Text(value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
     HorizontalDivider()
@@ -205,7 +206,7 @@ private fun ClickableRow(label: String, value: String? = null, onClick: () -> Un
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, style = MaterialTheme.typography.bodyLarge)
+        Text(label, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (value != null) {
                 Text(value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)

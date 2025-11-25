@@ -27,8 +27,8 @@ android {
         applicationId = "br.com.CapitularIA"
         minSdk = 29
         targetSdk = 36
-        versionCode = 7
-        versionName = "1.5"
+        versionCode = 10
+        versionName = "1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

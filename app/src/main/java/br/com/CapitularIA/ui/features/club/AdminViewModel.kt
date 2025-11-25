@@ -27,7 +27,7 @@ sealed class LeaveClubResult {
     data class ERROR(val message: String) : LeaveClubResult()
 }
 
-// ✅ NOVO: Resultado da ação de excluir
+// Resultado da ação de excluir
 sealed class DeleteClubResult {
     data object IDLE : DeleteClubResult()
     data object SUCCESS : DeleteClubResult()
@@ -60,7 +60,6 @@ class AdminViewModel : ViewModel() {
     private val _leaveResult = MutableLiveData<LeaveClubResult>(LeaveClubResult.IDLE)
     val leaveResult: LiveData<LeaveClubResult> = _leaveResult
 
-    // ✅ VARIÁVEL QUE FALTAVA
     private val _clubDeleted = MutableLiveData<DeleteClubResult>(DeleteClubResult.IDLE)
     val clubDeleted: LiveData<DeleteClubResult> = _clubDeleted
 
@@ -246,23 +245,32 @@ class AdminViewModel : ViewModel() {
         }
     }
 
-    // ✅ FUNÇÃO QUE FALTAVA
+    // ✅ Nova função: verifica se o clube pode ser deletado
+    fun canDeleteClub(): Boolean {
+        val currentClub = _club.value
+        val userId = currentUserId
+
+        if (currentClub == null || userId == null) {
+            _toastMessage.value = "Erro: Clube não encontrado."
+            return false
+        }
+
+        if (currentClub.adminId != userId) {
+            _toastMessage.value = "Apenas o admin pode excluir o clube."
+            return false
+        }
+
+        if (currentClub.members.size > 1) {
+            _toastMessage.value = "Você precisa ser o único membro para excluir o clube."
+            return false
+        }
+
+        return true
+    }
+
+    // Função limpa apenas para deletar
     fun deleteClub() {
         viewModelScope.launch {
-            val currentClub = _club.value
-            if (currentClub == null || currentUserId == null) {
-                _toastMessage.value = "Erro: Clube não encontrado."
-                return@launch
-            }
-            if (currentClub.adminId != currentUserId) {
-                _toastMessage.value = "Apenas o admin pode excluir o clube."
-                return@launch
-            }
-            if (currentClub.members.size > 1) {
-                _toastMessage.value = "Você precisa ser o único membro para excluir o clube."
-                return@launch
-            }
-
             try {
                 db.collection("clubs").document(currentClubId).delete().await()
                 _toastMessage.value = "Clube excluído com sucesso."

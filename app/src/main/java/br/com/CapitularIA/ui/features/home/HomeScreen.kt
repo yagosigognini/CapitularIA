@@ -54,6 +54,8 @@ import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 
 private data class UpdateInfo(
@@ -180,38 +182,39 @@ fun HomeScreenContent(
     onClubClick: (BookClub) -> Unit
 ) {
     AppBackground(backgroundResId = R.drawable.app_background) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+        // ✅ MUDANÇA: Sai LazyColumn, entra Column
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.systemBars) // Garante que não fica atrás das barras
+                .verticalScroll(rememberScrollState()), // Permite rolar em telas pequenas
             horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = WindowInsets.systemBars.asPaddingValues()
         ) {
-            item {
-                HomeTopBar(
-                    profileImageUrl = user?.profilePictureUrl,
-                    onProfileClick = onProfileClick,
-                    onSettingsClick = onSettingsClick
-                )
-            }
-            item { Spacer(modifier = Modifier.height(32.dp)) }
-            item { QuoteSection(quote = quote) }
-            item { Spacer(modifier = Modifier.height(32.dp)) }
+            HomeTopBar(
+                profileImageUrl = user?.profilePictureUrl,
+                onProfileClick = onProfileClick,
+                onSettingsClick = onSettingsClick
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            QuoteSection(quote = quote)
+            Spacer(modifier = Modifier.height(32.dp))
 
             if (clubs.isEmpty()) {
-                item {
-                    EmptyClubsSection()
-                }
+                EmptyClubsSection()
             } else {
-                item {
-                    ClubsSection(
-                        title = "Meus Clubes",
-                        clubs = clubs,
-                        onClubClick = onClubClick
-                    )
-                }
+                ClubsSection(
+                    title = "Meus Clubes",
+                    clubs = clubs,
+                    onClubClick = onClubClick
+                )
             }
 
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-            item { ActionButtons(onCreateClubClick, onJoinClubClick) }
+            // ✅ MUDANÇA: Este Spacer se estica para empurrar os botões para baixo
+            Spacer(modifier = Modifier.weight(1f))
+
+            Spacer(modifier = Modifier.height(24.dp)) // Espaço mínimo
+            ActionButtons(onCreateClubClick, onJoinClubClick)
+            Spacer(modifier = Modifier.height(32.dp)) // Espaço na parte inferior
         }
     }
 }
@@ -259,13 +262,13 @@ fun QuoteSection(quote: Quote) {
             text = quote.text,
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center,
-            color = homeTextColor
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = quote.source,
             style = MaterialTheme.typography.bodySmall,
-            color = homeTextColor.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -312,14 +315,14 @@ fun EmptyClubsSection() {
             "Você ainda não está em nenhum clube",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = homeTextColor
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             "Crie um novo clube ou use a busca para encontrar um clube e participar!",
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            color = homeTextColor.copy(alpha = 0.8f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

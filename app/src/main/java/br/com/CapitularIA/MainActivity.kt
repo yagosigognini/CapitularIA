@@ -221,10 +221,6 @@ fun AppNavigation(
                 userId = backStackEntry.arguments?.getString("userId"),
                 onBackClick = { navController.popBackStack() },
                 onEditProfileClick = { navController.navigate("edit_profile") },
-                onLogoutClick = {
-                    authViewModel.logout()
-                    navController.navigate("login") { popUpTo(0) }
-                },
                 onSettingsClick = { navController.navigate("settings") },
                 onClubClick = { club ->
                     navController.navigate("club/${club.id}")

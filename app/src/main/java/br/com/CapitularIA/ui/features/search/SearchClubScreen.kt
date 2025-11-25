@@ -125,7 +125,8 @@ fun SearchClubScreenContent(
                 Text(
                     "Clubes públicos",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 if (isLoading) {

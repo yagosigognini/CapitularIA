@@ -14,6 +14,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -21,6 +23,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -136,119 +139,131 @@ fun LoginScreenContent(
     var passwordVisible by remember { mutableStateOf(false) }
 
     AppBackground(backgroundResId = R.drawable.app_background) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        // ✅ MUDANÇA: Sai Box, entra Column rolável
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.systemBars) // Protege das barras de sistema
+                .verticalScroll(rememberScrollState()) // Adiciona rolagem
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            // Distribui o espaço em telas grandes, permite rolar em pequenas
+            verticalArrangement = Arrangement.SpaceAround
+        ) {
+
+            // Spacer flexível (opcional, mas ajuda a centralizar)
+            // Spacer(modifier = Modifier.weight(1f))
+
+            Image(
+                painter = painterResource(id = R.drawable.logo_completa),
+                contentDescription = "Logo Letraria",
+                // ✅ MUDANÇA: Tamanho fixo trocado por relativo
+                modifier = Modifier
+                    .fillMaxWidth(0.8f) // Ocupa 80% da largura
+                    .padding(vertical = 32.dp),
+                contentScale = ContentScale.Fit
+            )
+
+
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo_completa),
-                    contentDescription = "Logo Letraria",
-                    modifier = Modifier.size(300.dp),
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = onEmailChange,
+                    label = { Text("Email") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    enabled = !isLoading
                 )
-                Spacer(modifier = Modifier.height(30.dp))
-                Column(
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = onPasswordChange,
+                    label = { Text("Senha") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    singleLine = true,
+                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) { Icon(image, null) }
+                    },
+                    enabled = !isLoading
+                )
+
+                TextButton(
+                    onClick = onForgotPasswordClick,
+                    enabled = !isLoading,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(vertical = 4.dp)
+                ) {
+                    Text(
+                        "Esqueci minha senha",
+                        color = TextColor,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = onLoginClick,
+                    enabled = !isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = ButtonRed)
                 ) {
-                    OutlinedTextField(
-                        value = email,
-                        onValueChange = onEmailChange,
-                        label = { Text("Email") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        enabled = !isLoading
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    OutlinedTextField(
-                        value = password,
-                        onValueChange = onPasswordChange,
-                        label = { Text("Senha") },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(12.dp),
-                        singleLine = true,
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        trailingIcon = {
-                            val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) { Icon(image, null) }
-                        },
-                        enabled = !isLoading
-                    )
-
-                    TextButton(
-                        onClick = onForgotPasswordClick,
-                        enabled = !isLoading,
-                        modifier = Modifier.fillMaxWidth(),
-                        contentPadding = PaddingValues(vertical = 4.dp)
-                    ) {
-                        Text(
-                            "Esqueci minha senha",
-                            color = TextColor,
-                            modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.End
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = onLoginClick,
-                        enabled = !isLoading,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = ButtonRed)
-                    ) {
-                        if (isLoading) {
-                            CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
-                        } else {
-                            Text("ENTRAR", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    TextButton(onClick = onRegisterClick, enabled = !isLoading) {
-                        Text("Não tem uma conta? Cadastre-se", color = TextColor)
-                    }
-
-                    // --- SEPARADOR E BOTÃO DO GOOGLE ---
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        HorizontalDivider(modifier = Modifier.weight(1f))
-                        Text("OU", modifier = Modifier.padding(horizontal = 8.dp), color = TextColor)
-                        HorizontalDivider(modifier = Modifier.weight(1f))
-                    }
-
-                    OutlinedButton(
-                        onClick = onGoogleLoginClick,
-                        enabled = !isLoading,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(12.dp),
-                        border = BorderStroke(1.dp, Color.Gray)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_google_logo),
-                            contentDescription = "Logo do Google",
-                            modifier = Modifier.size(24.dp),
-                            tint = Color.Unspecified
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text("Entrar com Google", color = TextColor, fontWeight = FontWeight.Bold)
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                    } else {
+                        Text("ENTRAR", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
-                Spacer(modifier = Modifier.height(70.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                TextButton(onClick = onRegisterClick, enabled = !isLoading) {
+                    Text("Não tem uma conta? Cadastre-se", color = TextColor)
+                }
+
+                // --- SEPARADOR E BOTÃO DO GOOGLE ---
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    HorizontalDivider(modifier = Modifier.weight(1f))
+                    Text("OU", modifier = Modifier.padding(horizontal = 8.dp), color = TextColor)
+                    HorizontalDivider(modifier = Modifier.weight(1f))
+                }
+
+                OutlinedButton(
+                    onClick = onGoogleLoginClick,
+                    enabled = !isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, Color.Gray)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_google_logo),
+                        contentDescription = "Logo do Google",
+                        modifier = Modifier.size(24.dp),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text("Entrar com Google", color = TextColor, fontWeight = FontWeight.Bold)
+                }
             }
+
         }
     }
 }
