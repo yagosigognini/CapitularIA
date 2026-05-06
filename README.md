@@ -1,4 +1,4 @@
-# 📚 Letraria
+# 📚 Capitularia
 
 > Uma rede social de leitura em Android para clubes do livro, com chat, ciclos de indicação e recursos de comunidade.
 
@@ -12,7 +12,7 @@
 
 ## ✨ Visão geral
 
-O **Letraria** é um app focado em leitura colaborativa:
+O **Capitularia** é um app focado em leitura colaborativa:
 
 - criação e participação em **clubes de leitura**;
 - **chat por clube** para conversar durante os ciclos;
@@ -61,7 +61,7 @@ A proposta é transformar o hábito de leitura em experiência social, divertida
 ## 📁 Organização do projeto
 
 ```text
-app/src/main/java/br/com/letrariaapp/
+app/src/main/java/br/com/Capitulariaapp/
 ├── data/                 # Modelos de dados (Book, Message, User, etc.)
 ├── network/              # Serviços Retrofit (Google Books / Gemini)
 ├── services/             # Serviços auxiliares (ex.: token FCM)
@@ -137,6 +137,6 @@ Projeto em desenvolvimento interno. Definir licença pública quando apropriado.
 
 ## 💙 Sobre o nome
 
-**Letraria** vem da ideia de um lugar para letras, histórias e encontros.
+**CapitularIA** vem da ideia de um lugar para letras, histórias e encontros.
 
 Se leitura é jornada, aqui ela é coletiva. 📖✨
