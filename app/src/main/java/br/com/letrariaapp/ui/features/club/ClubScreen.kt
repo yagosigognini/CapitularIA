@@ -2,11 +2,12 @@ package br.com.letrariaapp.ui.features.club
 
 // --- Imports Essenciais ---
 import android.util.Log // ⚠️ IMPORT ADICIONADO
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -75,10 +77,7 @@ fun ClubScreen(
     val bookPendingIndication by viewModel.bookPendingIndication // Observa o livro pendente vindo da busca
 
     var inputText by remember { mutableStateOf("") } // Estado local para o campo de mensagem
-    var showOptionsMenu by remember { mutableStateOf(false) }
-    var showHistoryDialog by remember { mutableStateOf(false) }
-    var showGamificationDialog by remember { mutableStateOf(false) }
-    var showGeminiDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     // Mostra o diálogo de confirmação se houver um livro pendente (retornado da busca)
     bookPendingIndication?.let { book ->
@@ -89,41 +88,6 @@ fun ClubScreen(
             onDismiss = { viewModel.cancelBookIndication() }, // Ação de cancelar
             onConfirm = { daysString -> viewModel.confirmBookIndication(daysString) } // Ação de confirmar
         )
-    }
-    if (showOptionsMenu) {
-        ClubOptionsDialog(
-            onDismiss = { showOptionsMenu = false },
-            onGeminiClick = {
-                showOptionsMenu = false
-                showGeminiDialog = true
-            },
-            onHistoryClick = {
-                showOptionsMenu = false
-                showHistoryDialog = true
-            },
-            onGamificationClick = {
-                showOptionsMenu = false
-                showGamificationDialog = true
-            }
-        )
-    }
-
-    if (showHistoryDialog) {
-        ClubHistoryDialog(
-            messages = messages,
-            onDismiss = { showHistoryDialog = false }
-        )
-    }
-
-    if (showGamificationDialog) {
-        ClubGamificationDialog(
-            messages = messages,
-            onDismiss = { showGamificationDialog = false }
-        )
-    }
-
-    if (showGeminiDialog) {
-        GeminiRecommendationDialog(onDismiss = { showGeminiDialog = false })
     }
 
     // Passa os estados e callbacks para a tela "burra" (Content)
@@ -147,7 +111,8 @@ fun ClubScreen(
         onProfileClick = onProfileClick,
         onAdminClick = onAdminClick,
         onMenuClick = {
-            showOptionsMenu = true
+            // Ação temporária para o botão de menu
+            Toast.makeText(context, "Menu de opções", Toast.LENGTH_SHORT).show()
         }
     )
 }
@@ -413,32 +378,8 @@ fun MessageList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp) // Espaço entre mensagens
     ) {
-        itemsIndexed(messages) { index, message ->
-            val currentDateLabel = message.timestamp.toChatDateSeparator()
-            val previousDateLabel = messages.getOrNull(index - 1)?.timestamp.toChatDateSeparator()
-            if (index == 0 || currentDateLabel != previousDateLabel) {
-                DaySeparator(label = currentDateLabel)
-            }
-            MessageItem(message = message, onProfileClick = onProfileClick)
-        }
-    }
-}
-
-@Composable
-private fun DaySeparator(label: String) {
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            shape = RoundedCornerShape(999.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.9f)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-            )
+        items(messages) { message -> // Itera sobre a lista de mensagens
+            MessageItem(message = message, onProfileClick = onProfileClick) // Passa cada mensagem
         }
     }
 }
@@ -565,111 +506,6 @@ private fun Date?.toFormattedString(): String {
         Log.e("ClubScreenFormatting", "Erro ao formatar data: $this", e)
         "" // Retorna vazio em caso de erro
     }
-}
-
-private fun Date?.toChatDateSeparator(now: Calendar = Calendar.getInstance()): String {
-    if (this == null) return "Sem data"
-    val messageCal = Calendar.getInstance().apply { time = this@toChatDateSeparator }
-
-    val today = now.clone() as Calendar
-    val yesterday = (now.clone() as Calendar).apply { add(Calendar.DAY_OF_YEAR, -1) }
-
-    return when {
-        messageCal.isSameDay(today) -> "Hoje"
-        messageCal.isSameDay(yesterday) -> "Ontem"
-        else -> {
-            val pattern = if (messageCal.get(Calendar.YEAR) == today.get(Calendar.YEAR)) {
-                "EEEE, d 'de' MMMM"
-            } else {
-                "EEEE, d 'de' MMMM 'de' yyyy"
-            }
-            SimpleDateFormat(pattern, Locale("pt", "BR")).format(this)
-                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale("pt", "BR")) else it.toString() }
-        }
-    }
-}
-
-private fun Calendar.isSameDay(other: Calendar): Boolean {
-    return get(Calendar.YEAR) == other.get(Calendar.YEAR) &&
-        get(Calendar.DAY_OF_YEAR) == other.get(Calendar.DAY_OF_YEAR)
-}
-
-@Composable
-private fun ClubOptionsDialog(
-    onDismiss: () -> Unit,
-    onGeminiClick: () -> Unit,
-    onHistoryClick: () -> Unit,
-    onGamificationClick: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Menu do clube") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = onGeminiClick, modifier = Modifier.fillMaxWidth()) { Text("Pedir recomendação") }
-                Button(onClick = onHistoryClick, modifier = Modifier.fillMaxWidth()) { Text("Histórico") }
-                Button(onClick = onGamificationClick, modifier = Modifier.fillMaxWidth()) { Text("Gamificação") }
-            }
-        },
-        confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Fechar") } }
-    )
-}
-
-@Composable
-private fun ClubHistoryDialog(messages: List<Message>, onDismiss: () -> Unit) {
-    val history = messages.filter { it.type == "INDICATION" && it.indicatedBook != null }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Histórico de leituras") },
-        text = {
-            if (history.isEmpty()) {
-                Text("Ainda não há livros registrados no histórico.")
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    history.takeLast(10).reversed().forEachIndexed { index, msg ->
-                        Text("${index + 1}. ${msg.indicatedBook?.title} — ${msg.indicatedBook?.author}")
-                    }
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Ok") } }
-    )
-}
-
-@Composable
-private fun ClubGamificationDialog(messages: List<Message>, onDismiss: () -> Unit) {
-    val userCount = messages.groupBy { it.senderId }.mapValues { it.value.size }
-    val top = userCount.maxByOrNull { it.value }
-    val totalMessages = messages.count { it.type == "USER" }
-    val badgeText = when {
-        totalMessages >= 100 -> "🔥 Fominha da leitura"
-        totalMessages >= 40 -> "📚 Leitor dedicado"
-        else -> "🌱 Leitor em evolução"
-    }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Gamificação") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Mensagens no clube: $totalMessages")
-                Text("Título atual do grupo: $badgeText")
-                Text("Mais ativo: ${top?.key ?: "N/A"} (${top?.value ?: 0} mensagens)")
-                Text("Sugestão de títulos: 🌙 Leitor da madrugada, 💬 Comunicador, 🧠 Crítico literário.")
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Fechar") } }
-    )
-}
-
-@Composable
-private fun GeminiRecommendationDialog(onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Pedir recomendação") },
-        text = { Text("A integração da Gemini já está preparada. Próximo passo: ligar este botão à tela/fluxo de prompt para gerar recomendações no clube.") },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Entendi") } }
-    )
 }
 
 // --- PREVIEW ---
